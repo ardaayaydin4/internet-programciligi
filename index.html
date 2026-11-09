@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnternet Programcılığı</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        /* Radio button custom color accent */
+        input[type="radio"] {
+            accent-color: #2563eb;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-6 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-blue-700 tracking-tight">İnternet Programcılığı - Arda Ayaydın</h1>
+            <p class="text-sm md:text-base text-gray-500 mt-2 font-medium">İşkurlu arkadaşlar ibana 20 lira bekliyorum  </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-8">
+        
+        <!-- Score Modal / Sticky Banner (Hidden by default) -->
+        <div id="resultModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform transition-all">
+                <div id="modalIcon" class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 mb-6">
+                    <svg class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Sınav Tamamlandı!</h2>
+                <p class="text-gray-500 mb-6">Sonucunuz başarıyla hesaplandı.</p>
+                <div class="bg-gray-50 rounded-xl p-6 mb-6 border border-gray-100">
+                    <p class="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-1">Puanınız</p>
+                    <p id="scoreText" class="text-5xl font-black text-blue-600">100</p>
+                </div>
+                <p id="scoreDetailText" class="text-sm text-gray-600 mb-8">30 sorudan 30 doğru yaptınız.</p>
+                <button onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition duration-200">
+                    Cevapları İncele
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Form Container -->
+        <form id="quizForm" class="space-y-6">
+            <div id="questionsContainer" class="space-y-8">
+                <!-- Questions will be injected here via JS -->
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-8 pb-12 flex justify-center border-t border-gray-200 mt-10">
+                <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 px-12 rounded-full shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-1 w-full md:w-auto">
+                    Sınavı Bitir
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <!-- Javascript Logic -->
+    <script>
+        // Data containing all 30 questions
+        const rawQuestions = [
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>for ($i=1; $i<=8; ____) {<br>&nbsp;&nbsp;echo \"MERHABA PHP\";<br>}</code>",
+                options: [
+                    { text: "$i++", isCorrect: true },
+                    { text: "$i--", isCorrect: false },
+                    { text: "$i=0", isCorrect: false },
+                    { text: "$i+2", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>while($sayi<10) {<br>&nbsp;&nbsp;$sonuc=$sonuc*$sayi;<br>&nbsp;&nbsp;____;<br>}</code>",
+                options: [
+                    { text: "$sayi++", isCorrect: true },
+                    { text: "break", isCorrect: false },
+                    { text: "continue", isCorrect: false },
+                    { text: "$sayi--", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>echo \"Yönlendiriliyorsunuz\";<br>____(\"Location:Gonderilen.php\");</code>",
+                options: [
+                    { text: "header", isCorrect: true },
+                    { text: "location", isCorrect: false },
+                    { text: "redirect", isCorrect: false },
+                    { text: "echo", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>$dizi1=array(5,12,17,92,19,6);<br>echo \"Dizinin en büyük elemanı:\".____($dizi1);</code>",
+                options: [
+                    { text: "max", isCorrect: true },
+                    { text: "min", isCorrect: false },
+                    { text: "count", isCorrect: false },
+                    { text: "toplam", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>____($dizi as $deger) {<br>&nbsp;&nbsp;echo $deger;<br>}</code>",
+                options: [
+                    { text: "foreach", isCorrect: true },
+                    { text: "for", isCorrect: false },
+                    { text: "while", isCorrect: false },
+                    { text: "array", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>____ yaz() {<br>&nbsp;&nbsp;echo \"Mardin Myo\";<br>}</code>",
+                options: [
+                    { text: "function", isCorrect: true },
+                    { text: "def", isCorrect: false },
+                    { text: "method", isCorrect: false },
+                    { text: "class", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>____ \"deneme.php\";<br>echo kup(5);</code>",
+                options: [
+                    { text: "include", isCorrect: true },
+                    { text: "import", isCorrect: false },
+                    { text: "require_once", isCorrect: false },
+                    { text: "add", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>&lt;form ____=\"kayit.php\" method=\"post\"&gt;</code>",
+                options: [
+                    { text: "action", isCorrect: true },
+                    { text: "href", isCorrect: false },
+                    { text: "src", isCorrect: false },
+                    { text: "link", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>if (____($_POST['kullanici'])) {<br>&nbsp;&nbsp;$kullanici = $_POST['kullanici'];<br>}</code>",
+                options: [
+                    { text: "isset", isCorrect: true },
+                    { text: "empty", isCorrect: false },
+                    { text: "null", isCorrect: false },
+                    { text: "check", isCorrect: false }
+                ]
+            },
+            {
+                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>while($cekilen_veri = ____($veriler)) {<br>&nbsp;&nbsp;extract($cekilen_veri);<br>}</code>",
+                options: [
+                    { text: "mysqli_fetch_assoc", isCorrect: true },
+                    { text: "mysql_read", isCorrect: false },
+                    { text: "db_fetch", isCorrect: false },
+                    { text: "mysqli_get_row", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de kullanılan <code class='bg-gray-100 px-1 rounded'>print_r()</code> fonksiyonunun temel amacı nedir?",
+                options: [
+                    { text: "Dizinin tüm yapısını ekrana detaylıca yazdırır.", isCorrect: true },
+                    { text: "Sadece ilk elemanı yazar.", isCorrect: false },
+                    { text: "Diziyi siler.", isCorrect: false },
+                    { text: "Diziyi düz metne çevirir.", isCorrect: false }
+                ]
+            },
+            {
+                text: "Döngülerde kullanılan <code class='bg-gray-100 px-1 rounded'>break</code> deyiminin görevi aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "Döngünün akışını tamamen keserek döngüden çıkar.", isCorrect: true },
+                    { text: "Sonraki adıma atlar.", isCorrect: false },
+                    { text: "Programı kapatır.", isCorrect: false },
+                    { text: "Sayfayı yeniler.", isCorrect: false }
+                ]
+            },
+            {
+                text: "HTML formlarında verileri gönderirken kullanılan GET ve POST metotları arasındaki en belirgin fark nedir?",
+                options: [
+                    { text: "POST verileri adres çubuğunda gizli tutar.", isCorrect: true },
+                    { text: "GET daha güvenlidir.", isCorrect: false },
+                    { text: "POST sadece sayılarda kullanılır.", isCorrect: false },
+                    { text: "GET daha yavaştır.", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de form kontrolleri sırasında kullanılan <code class='bg-gray-100 px-1 rounded'>empty()</code> fonksiyonunun işlevi nedir?",
+                options: [
+                    { text: "Bir değişkenin veya form verisinin boş bırakılıp bırakılmadığını kontrol eder.", isCorrect: true },
+                    { text: "Değişkeni tamamen siler.", isCorrect: false },
+                    { text: "Formu sıfırlar.", isCorrect: false },
+                    { text: "Diziyi boşaltır.", isCorrect: false }
+                ]
+            },
+            {
+                text: "HTML form elemanları olan <code class='bg-gray-100 px-1 rounded'>&lt;input type=\"radio\"&gt;</code> ve <code class='bg-gray-100 px-1 rounded'>&lt;input type=\"checkbox\"&gt;</code> arasındaki kullanım farkı aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "Radio sadece tek seçime izin verir, checkbox birden çok seçeneğe izin verir.", isCorrect: true },
+                    { text: "Checkbox metin alır.", isCorrect: false },
+                    { text: "Radio çoklu seçime izin verir.", isCorrect: false },
+                    { text: "İkisi de aynı amaca hizmet eder.", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de tanımlanan bir dizinin (array) varsayılan ilk elemanının indeks numarası kaçtır?",
+                options: [
+                    { text: "0", isCorrect: true },
+                    { text: "1", isCorrect: false },
+                    { text: "-1", isCorrect: false },
+                    { text: "Boş", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP projelerinde kod modülerliğini sağlamak için kullanılan <code class='bg-gray-100 px-1 rounded'>include</code> komutunun amacı nedir?",
+                options: [
+                    { text: "Ortak fonksiyonları barındıran harici PHP dosyalarını mevcut koda aktarır.", isCorrect: true },
+                    { text: "Veritabanına doğrudan bağlanır.", isCorrect: false },
+                    { text: "Güvenlik duvarı oluşturur.", isCorrect: false },
+                    { text: "Sadece HTML kodlarını içe aktarır.", isCorrect: false }
+                ]
+            },
+            {
+                text: "HTML formlarında kullanılan <code class='bg-gray-100 px-1 rounded'>&lt;textarea&gt;</code> etiketinin kullanım amacı aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "Geniş ve çok satırlı metinlerin girilmesini sağlamak.", isCorrect: true },
+                    { text: "Sadece şifre girmek.", isCorrect: false },
+                    { text: "Dosya yükleme alanı oluşturmak.", isCorrect: false },
+                    { text: "Açılır liste (dropdown) yapmak.", isCorrect: false }
+                ]
+            },
+            {
+                text: "Bir <code class='bg-gray-100 px-1 rounded'>while</code> döngüsünün sonsuz bir döngüye girip sistemi kilitlediği tespit edilmiştir. Bunun en olası nedeni aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "Döngü içerisinde değişim miktarının (artırma/azaltma) yazılmaması.", isCorrect: true },
+                    { text: "echo komutunun kullanılmaması.", isCorrect: false },
+                    { text: "break yazılmış olması.", isCorrect: false },
+                    { text: "Koşulun yanlış tanımlanması.", isCorrect: false }
+                ]
+            },
+            {
+                text: "MySQL veritabanında işlem yaparken kullanılan <code class='bg-gray-100 px-1 rounded'>COUNT(*)</code> SQL komutunun amacı nedir?",
+                options: [
+                    { text: "Tablodaki veya belirli bir koşula uyan tüm satırların toplam adedini bulur.", isCorrect: true },
+                    { text: "Satırları kalıcı olarak siler.", isCorrect: false },
+                    { text: "Sayısal değerleri toplar.", isCorrect: false },
+                    { text: "Boş sütunları sayar.", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de kullanılan <code class='bg-gray-100 px-1 rounded'>header(\"Refresh: 3; url=Gonderilen.php\")</code> komut satırı çalıştırıldığında ne olur?",
+                options: [
+                    { text: "Geçerli sayfa 3 saniye bekledikten sonra belirtilen url'ye yönlenir.", isCorrect: true },
+                    { text: "Sayfa arka planda 3 kere yenilenir.", isCorrect: false },
+                    { text: "Sayfa 3 saniye sonra tamamen kapanır.", isCorrect: false },
+                    { text: "Belirtilen url sayfada 3 kez açılır.", isCorrect: false }
+                ]
+            },
+            {
+                text: "HTML formlarında, kullanıcının bir listeden seçim yapabilmesi için açılır liste (dropdown) oluşturulmak istenmektedir. Formda hangi temel etiket kullanılmalıdır?",
+                options: [
+                    { text: "&lt;select&gt;", isCorrect: true },
+                    { text: "&lt;list&gt;", isCorrect: false },
+                    { text: "&lt;dropdown&gt;", isCorrect: false },
+                    { text: "&lt;option-group&gt;", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de tanımlanmış bir fonksiyonun içerisindeki işlemin sonucunu, fonksiyonun çağrıldığı yere (dışarıya) döndürmek için hangi deyim kullanılmalıdır?",
+                options: [
+                    { text: "return", isCorrect: true },
+                    { text: "echo", isCorrect: false },
+                    { text: "print", isCorrect: false },
+                    { text: "export", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP'de <code class='bg-gray-100 px-1 rounded'>if</code> koşullu yapılarında, iki değerin birbirine 'eşit olmadığını' kontrol etmek için hangi karşılaştırma operatörü kullanılır?",
+                options: [
+                    { text: "!=", isCorrect: true },
+                    { text: "==", isCorrect: false },
+                    { text: "===", isCorrect: false },
+                    { text: "&lt;&gt;", isCorrect: false }
+                ]
+            },
+            {
+                text: "Bir dizi değişkenindeki verilerle işlem yaparken <code class='bg-gray-100 px-1 rounded'>count()</code> fonksiyonunun kullanılma amacı nedir?",
+                options: [
+                    { text: "Dizideki toplam eleman sayısını hesaplar.", isCorrect: true },
+                    { text: "Dizideki sayıları birbiriyle toplar.", isCorrect: false },
+                    { text: "Sadece harfleri sayar.", isCorrect: false },
+                    { text: "Diziyi alfabetik olarak sıralar.", isCorrect: false }
+                ]
+            },
+            {
+                text: "Döngülerde <code class='bg-gray-100 px-1 rounded'>continue</code> deyiminin çalışma mantığı aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "Döngünün o anki adımını pas geçer ve doğrudan bir sonraki turdan devam eder.", isCorrect: true },
+                    { text: "Döngüyü tamamen bitirir.", isCorrect: false },
+                    { text: "Programı anında durdurur.", isCorrect: false },
+                    { text: "Şart sağlanmazsa hata verir.", isCorrect: false }
+                ]
+            },
+            {
+                text: "PHP projelerinde MySQL veritabanı ile ilk bağlantıyı kurmak için kullanılan ana fonksiyon aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "mysqli_connect", isCorrect: true },
+                    { text: "mysql_start", isCorrect: false },
+                    { text: "db_connect", isCorrect: false },
+                    { text: "pdo_start", isCorrect: false }
+                ]
+            },
+            {
+                text: "Veritabanı tablolarında işlem yaparken, belirli bir sütundaki verilerin genel ortalamasını almak için hangi SQL fonksiyonu kullanılır?",
+                options: [
+                    { text: "AVG()", isCorrect: true },
+                    { text: "SUM()", isCorrect: false },
+                    { text: "ORT()", isCorrect: false },
+                    { text: "MEAN()", isCorrect: false }
+                ]
+            },
+            {
+                text: "HTML formlarında yer alan <code class='bg-gray-100 px-1 rounded'>&lt;input&gt;</code> etiketlerinin metin kutusu mu, şifre mi yoksa buton mu olacağını belirleyen özellik aşağıdakilerden hangisidir?",
+                options: [
+                    { text: "type", isCorrect: true },
+                    { text: "name", isCorrect: false },
+                    { text: "id", isCorrect: false },
+                    { text: "class", isCorrect: false }
+                ]
+            },
+            {
+                text: "Bir PHP projesinde, yeni oluşturulan bir diziyi değişkenlere atamak için hangi tanımlama yöntemi kullanılmalıdır?",
+                options: [
+                    { text: "array()", isCorrect: true },
+                    { text: "list()", isCorrect: false },
+                    { text: "new Array", isCorrect: false },
+                    { text: "[]", isCorrect: false }
+                ]
+            }
+        ];
+
+        // Fisher-Yates Shuffle algorithm
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Prepare Questions (shuffle options)
+        const questions = rawQuestions.map((q, index) => {
+            return {
+                id: index,
+                text: q.text,
+                options: shuffleArray([...q.options]) // Shuffle a copy of the options
+            };
+        });
+
+        const questionsContainer = document.getElementById('questionsContainer');
+        const quizForm = document.getElementById('quizForm');
+
+        // Render Questions
+        function renderQuiz() {
+            const alphabet = ['A', 'B', 'C', 'D'];
+            
+            questions.forEach((q, qIndex) => {
+                // Card Container
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100 hover:shadow-md transition-shadow";
+                
+                // Question Title
+                const questionTitle = document.createElement('h3');
+                questionTitle.className = "text-lg font-semibold text-gray-800 mb-5 leading-relaxed";
+                questionTitle.innerHTML = `<span class="text-blue-600 mr-2">Soru ${qIndex + 1}:</span> ${q.text}`;
+                card.appendChild(questionTitle);
+
+                // Options Container
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = "space-y-3";
+
+                q.options.forEach((opt, optIndex) => {
+                    const label = document.createElement('label');
+                    // Data attribute to track correctness for evaluation later
+                    label.setAttribute('data-correct', opt.isCorrect);
+                    label.className = "option-label flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all";
+                    
+                    const radioInput = document.createElement('input');
+                    radioInput.type = "radio";
+                    radioInput.name = `question-${qIndex}`;
+                    radioInput.value = optIndex;
+                    radioInput.className = "form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300";
+
+                    // Seçim yapıldığı anda seçeneğin rengini göster
+                    radioInput.addEventListener('change', function() {
+                        optionsGrid.querySelectorAll('.option-label').forEach(optionLabel => {
+                            optionLabel.classList.remove(
+                                'bg-green-100', 'border-green-500', 'text-green-800',
+                                'bg-red-100', 'border-red-500', 'text-red-800'
+                            );
+                            optionLabel.classList.add('bg-white', 'border-gray-200');
+                        });
+
+                        if (opt.isCorrect) {
+                            label.classList.remove('bg-white', 'border-gray-200');
+                            label.classList.add('bg-green-100', 'border-green-500');
+                            spanText.classList.remove('text-gray-700');
+                            spanText.classList.add('text-green-800');
+                        } else {
+                            label.classList.remove('bg-white', 'border-gray-200');
+                            label.classList.add('bg-red-100', 'border-red-500');
+                            spanText.classList.remove('text-gray-700');
+                            spanText.classList.add('text-red-800');
+                        }
+                    });
+                    
+                    const spanPrefix = document.createElement('span');
+                    spanPrefix.className = "ml-3 mr-2 font-bold text-gray-500 w-5";
+                    spanPrefix.innerText = `${alphabet[optIndex]})`;
+
+                    const spanText = document.createElement('span');
+                    spanText.className = "text-gray-700 font-medium";
+                    spanText.innerText = opt.text;
+
+                    label.appendChild(radioInput);
+                    label.appendChild(spanPrefix);
+                    label.appendChild(spanText);
+                    optionsGrid.appendChild(label);
+                });
+
+                card.appendChild(optionsGrid);
+                questionsContainer.appendChild(card);
+            });
+        }
+
+        // Handle Quiz Submission
+        quizForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+            
+            // Get all card containers
+            const cards = questionsContainer.children;
+
+            for (let i = 0; i < totalQuestions; i++) {
+                const card = cards[i];
+                const labels = card.querySelectorAll('.option-label');
+                const radios = card.querySelectorAll('input[type="radio"]');
+                
+                let answeredCorrectly = false;
+
+                // Disable all radios and remove hover effects
+                labels.forEach((label, idx) => {
+                    const radio = radios[idx];
+                    radio.disabled = true;
+                    label.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'cursor-pointer');
+                    label.classList.add('cursor-not-allowed');
+
+                    const isCorrect = label.getAttribute('data-correct') === 'true';
+                    
+                    if (radio.checked) {
+                        if (isCorrect) {
+                            // User selected correctly
+                            answeredCorrectly = true;
+                            label.classList.add('bg-green-100', 'border-green-500');
+                            label.classList.remove('border-gray-200');
+                            label.querySelector('span.text-gray-700').classList.add('text-green-800');
+                        } else {
+                            // User selected wrongly
+                            label.classList.add('bg-red-100', 'border-red-500');
+                            label.classList.remove('border-gray-200');
+                            label.querySelector('span.text-gray-700').classList.add('text-red-800');
+                        }
+                    } else if (isCorrect) {
+                        // Highlight the correct answer anyway if user didn't pick it or picked wrong
+                        label.classList.add('bg-green-50', 'border-green-400');
+                        label.classList.remove('border-gray-200');
+                        label.querySelector('span.text-gray-700').classList.add('text-green-700');
+                    }
+                });
+
+                if (answeredCorrectly) {
+                    correctCount++;
+                }
+            }
+
+            // Calculate Score (100 / 30 = 3.333... per question)
+            // Round to 2 decimal places, or 0 decimals if it's a whole number
+            let score = (correctCount / totalQuestions) * 100;
+            score = Number.isInteger(score) ? score : score.toFixed(2);
+
+            // Display Modal
+            const modal = document.getElementById('resultModal');
+            const scoreText = document.getElementById('scoreText');
+            const scoreDetailText = document.getElementById('scoreDetailText');
+            const submitBtn = document.getElementById('submitBtn');
+            const modalIcon = document.getElementById('modalIcon');
+
+            scoreText.innerText = score;
+            scoreDetailText.innerText = `${totalQuestions} sorudan ${correctCount} doğru yaptınız.`;
+            
+            // Icon and color change based on score
+            if(score >= 50) {
+                modalIcon.classList.replace('bg-red-100', 'bg-green-100');
+                modalIcon.innerHTML = `<svg class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                scoreText.classList.replace('text-blue-600', 'text-green-600');
+                scoreText.classList.replace('text-red-600', 'text-green-600');
+            } else {
+                modalIcon.classList.replace('bg-green-100', 'bg-red-100');
+                modalIcon.classList.replace('bg-blue-100', 'bg-red-100');
+                modalIcon.innerHTML = `<svg class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+                scoreText.classList.replace('text-blue-600', 'text-red-600');
+                scoreText.classList.replace('text-green-600', 'text-red-600');
+            }
+
+            modal.classList.remove('hidden');
+            
+            // Change button state
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Sınav Bitti";
+            submitBtn.classList.replace('bg-blue-600', 'bg-gray-400');
+            submitBtn.classList.replace('hover:bg-blue-700', 'hover:bg-gray-400');
+            submitBtn.classList.remove('hover:-translate-y-1', 'shadow-lg');
+        });
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize quiz on load
+        document.addEventListener('DOMContentLoaded', renderQuiz);
+
+    </script>
+</body>
+</html>
