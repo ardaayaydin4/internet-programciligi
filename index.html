@@ -150,16 +150,6 @@
                 ]
             },
             {
-                text: "Aşağıdaki kod bloğunda boş bırakılan (____) yere hangisi gelmelidir? <br><code class='block bg-slate-100 p-3 mt-3 rounded-lg border border-slate-200 text-slate-700 font-mono'>while($cekilen_veri = ____($veriler)) {<br>&nbsp;&nbsp;extract($cekilen_veri);<br>}</code>",
-                explanation: "Çalışma Notu: Veritabanından gelen büyük veri tablolarını tek seferde okuyamayız. Satır satır dizi şeklinde okuyabilmek için mysqli_fetch_assoc() fonksiyonu while döngüsü içerisinde kullanılır.",
-                options: [
-                    { text: "mysqli_fetch_assoc", isCorrect: true },
-                    { text: "mysql_read", isCorrect: false },
-                    { text: "db_fetch", isCorrect: false },
-                    { text: "mysqli_get_row", isCorrect: false }
-                ]
-            },
-            {
                 text: "PHP'de kullanılan <code class='bg-gray-100 px-1 rounded'>print_r()</code> fonksiyonunun temel amacı nedir?",
                 explanation: "Çalışma Notu: echo komutu dizileri doğrudan yazdıramaz. Dizinin tüm elemanlarını ve anahtarlarını görmek için print_r() kullanılır.",
                 options: [
@@ -250,16 +240,6 @@
                 ]
             },
             {
-                text: "MySQL veritabanında işlem yaparken kullanılan <code class='bg-gray-100 px-1 rounded'>COUNT(*)</code> SQL komutunun amacı nedir?",
-                explanation: "Çalışma Notu: COUNT(*) fonksiyonu, belirtilen tablodaki toplam kayıt (satır) sayısını bulur.",
-                options: [
-                    { text: "Tablodaki veya belirli bir koşula uyan tüm satırların toplam adedini bulur.", isCorrect: true },
-                    { text: "Satırları kalıcı olarak siler.", isCorrect: false },
-                    { text: "Sayısal değerleri toplar.", isCorrect: false },
-                    { text: "Boş sütunları sayar.", isCorrect: false }
-                ]
-            },
-            {
                 text: "PHP'de kullanılan <code class='bg-gray-100 px-1 rounded'>header(\"Refresh: 3; url=Gonderilen.php\")</code> komut satırı çalıştırıldığında ne olur?",
                 explanation: "Çalışma Notu: Bulunulan sayfayı 3 saniye beklettikten sonra belirtilen URL adresine otomatik olarak yönlendirir.",
                 options: [
@@ -267,16 +247,6 @@
                     { text: "Sayfa arka planda 3 kere yenilenir.", isCorrect: false },
                     { text: "Sayfa 3 saniye sonra tamamen kapanır.", isCorrect: false },
                     { text: "Belirtilen url sayfada 3 kez açılır.", isCorrect: false }
-                ]
-            },
-            {
-                text: "HTML formlarında, kullanıcının bir listeden seçim yapabilmesi için açılır liste (dropdown) oluşturulmak istenmektedir. Formda hangi temel etiket kullanılmalıdır?",
-                explanation: "Çalışma Notu: Seçenekler için &lt;select&gt; kullanılır ve seçenekler listeye &lt;option&gt; etiketleri ile eklenir.",
-                options: [
-                    { text: "&lt;select&gt;", isCorrect: true },
-                    { text: "&lt;list&gt;", isCorrect: false },
-                    { text: "&lt;dropdown&gt;", isCorrect: false },
-                    { text: "&lt;option-group&gt;", isCorrect: false }
                 ]
             },
             {
@@ -300,16 +270,6 @@
                 ]
             },
             {
-                text: "Bir dizi değişkenindeki verilerle işlem yaparken <code class='bg-gray-100 px-1 rounded'>count()</code> fonksiyonunun kullanılma amacı nedir?",
-                explanation: "Çalışma Notu: count() fonksiyonu, bir dizinin içerisindeki toplam eleman sayısını sayar ve döndürür.",
-                options: [
-                    { text: "Dizideki toplam eleman sayısını hesaplar.", isCorrect: true },
-                    { text: "Dizideki sayıları birbiriyle toplar.", isCorrect: false },
-                    { text: "Sadece harfleri sayar.", isCorrect: false },
-                    { text: "Diziyi alfabetik olarak sıralar.", isCorrect: false }
-                ]
-            },
-            {
                 text: "Döngülerde <code class='bg-gray-100 px-1 rounded'>continue</code> deyiminin çalışma mantığı aşağıdakilerden hangisidir?",
                 explanation: "Çalışma Notu: continue, o turdaki işlemlerin geri kalanını atlar ve döngünün şart kısmından (sonraki turdan) doğrudan devam etmesini sağlar.",
                 options: [
@@ -317,26 +277,6 @@
                     { text: "Döngüyü tamamen bitirir.", isCorrect: false },
                     { text: "Programı anında durdurur.", isCorrect: false },
                     { text: "Şart sağlanmazsa hata verir.", isCorrect: false }
-                ]
-            },
-            {
-                text: "PHP projelerinde MySQL veritabanı ile ilk bağlantıyı kurmak için kullanılan ana fonksiyon aşağıdakilerden hangisidir?",
-                explanation: "Çalışma Notu: PHP'nin MySQLi eklentisinde veritabanına bağlanmak için mysqli_connect() fonksiyonu kullanılır.",
-                options: [
-                    { text: "mysqli_connect", isCorrect: true },
-                    { text: "mysql_start", isCorrect: false },
-                    { text: "db_connect", isCorrect: false },
-                    { text: "pdo_start", isCorrect: false }
-                ]
-            },
-            {
-                text: "Veritabanı tablolarında işlem yaparken, belirli bir sütundaki verilerin genel ortalamasını almak için hangi SQL fonksiyonu kullanılır?",
-                explanation: "Çalışma Notu: Ortalama alma işlemleri AVG() SQL fonksiyonuyla, toplam alma işlemleri ise SUM() fonksiyonuyla yapılır.",
-                options: [
-                    { text: "AVG()", isCorrect: true },
-                    { text: "SUM()", isCorrect: false },
-                    { text: "ORT()", isCorrect: false },
-                    { text: "MEAN()", isCorrect: false }
                 ]
             },
             {
